@@ -84,8 +84,26 @@ export const BotBubble = (props: Props) => {
             </div>
           ) : (
             <div class="flex items-center mt-2 gap-1">
-              {props?.feedback && props?.feedback?.feedBackType === 'POSITIVE' && <BsHandThumbsUp className="cursor-pointer" color="#303235" />}
-              {props?.feedback && props?.feedback?.feedBackType === 'NEGATIVE' && <BsHandThumbsDown color="#303235" className="cursor-pointer" />}
+              {props?.feedback && props?.feedback?.feedBackType === 'POSITIVE' && (
+                <div
+                  class="bg-blue-300 p-3 h-[10px] w-[10px] flex justify-center items-center rounded-md"
+                  style={{
+                    background: '#d5d9f0',
+                  }}
+                >
+                  <BsHandThumbsUp color="#303235" />
+                </div>
+              )}
+              {props?.feedback && props?.feedback?.feedBackType === 'NEGATIVE' && (
+                <div
+                  class="bg-blue-300 p-3 h-[10px] w-[10px] flex justify-center items-center rounded-md"
+                  style={{
+                    background: '#d5d9f0',
+                  }}
+                >
+                  <BsHandThumbsDown color="#303235" />
+                </div>
+              )}
             </div>
           ),
         svgContainerElement,
