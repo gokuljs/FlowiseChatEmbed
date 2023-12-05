@@ -404,7 +404,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
         chatId: chatId(),
         socketIOClientId: socketIOClientId(),
       };
-
       try {
         await updateFeedBack({
           chatflowid: props.chatflowid,
@@ -413,6 +412,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
         });
         setMessages(updatedMessage);
         localStorage.setItem(`${props.chatflowid}_EXTERNAL`, JSON.stringify({ chatId: chatId(), chatHistory: updatedMessage }));
+        setGiveFeedBack(null);
       } catch (error) {
         console.error('API Error:', error);
       }
