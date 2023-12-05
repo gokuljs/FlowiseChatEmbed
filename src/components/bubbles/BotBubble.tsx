@@ -2,21 +2,23 @@ import { Accessor, Setter, Show, onMount } from 'solid-js';
 import { Avatar } from '../avatars/Avatar';
 import { Marked } from '@ts-stack/markdown';
 import { sendFileDownloadQuery } from '@/queries/sendMessageQuery';
-import { FeedbackType } from '@/models/giveFeedback';
+import { FeedBack, FeedbackProps } from '@/models/giveFeedback';
 import { render } from 'solid-js/web';
 import BsHandThumbsDown from '@/assets/Icons/ThumbsDown';
 import BsHandThumbsUp from '@/assets/Icons/ThumbUp';
 
 type Props = {
   message: string;
-  giveFeedBack: Accessor<FeedbackType>;
-  setGiveFeedBack: Setter<FeedbackType>;
+  giveFeedBack: Accessor<FeedbackProps | null>;
+  setGiveFeedBack: Setter<FeedbackProps | null>;
+  defaultWelcomeMessage: string;
   apiHost?: string;
   fileAnnotations?: any;
   showAvatar?: boolean;
   avatarSrc?: string;
   backgroundColor?: string;
   textColor?: string;
+  feedback?: FeedBack;
 };
 
 const defaultBackgroundColor = '#f7f8ff';
@@ -53,25 +55,39 @@ export const BotBubble = (props: Props) => {
       svgContainerElement.id = 'svg-container';
       botMessageEl.appendChild(svgContainerElement);
       render(
-        () => (
-          <div class="flex items-center mt-2 gap-1">
-            <BsHandThumbsUp
-              className="cursor-pointer"
-              onclick={() => {
-                props.setGiveFeedBack(props.giveFeedBack() === 'THUMBS_UP' ? null : 'THUMBS_UP');
-              }}
-              color="#303235"
-            />
+        () =>
+          !props?.feedback && props?.defaultWelcomeMessage !== props?.message ? (
+            <div class="flex items-center mt-2 gap-1">
+              <BsHandThumbsUp
+                className="cursor-pointer"
+                onclick={() => {
+                  props.setGiveFeedBack({
+                    feedBackType: 'POSITIVE',
+                    chatMessage: props.message,
+                    feedbackMessage: '',
+                  });
+                }}
+                color="#303235"
+              />
 
-            <BsHandThumbsDown
-              color="#303235"
-              className="cursor-pointer"
-              onclick={() => {
-                props.setGiveFeedBack(props.giveFeedBack() === 'THUMBS_DOWN' ? null : 'THUMBS_DOWN');
-              }}
-            />
-          </div>
-        ),
+              <BsHandThumbsDown
+                color="#303235"
+                className="cursor-pointer"
+                onclick={() => {
+                  props.setGiveFeedBack({
+                    feedBackType: 'NEGATIVE',
+                    chatMessage: props.message,
+                    feedbackMessage: '',
+                  });
+                }}
+              />
+            </div>
+          ) : (
+            <div class="flex items-center mt-2 gap-1">
+              {props?.feedback && props?.feedback?.feedBackType === 'POSITIVE' && <BsHandThumbsUp className="cursor-pointer" color="#303235" />}
+              {props?.feedback && props?.feedback?.feedBackType === 'NEGATIVE' && <BsHandThumbsDown color="#303235" className="cursor-pointer" />}
+            </div>
+          ),
         svgContainerElement,
       );
       if (props.fileAnnotations && props.fileAnnotations.length) {

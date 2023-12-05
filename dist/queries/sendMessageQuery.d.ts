@@ -24,4 +24,8 @@ export declare const sendFileDownloadQuery: ({ apiHost, body }: MessageRequest) 
     data?: any;
     error?: Error | undefined;
 }>;
+export declare const updateFeedBack: ({ chatflowid, apiHost, body }: MessageRequest) => Promise<{
+    data?: any;
+    error?: Error | undefined;
+}>;
 //# sourceMappingURL=sendMessageQuery.d.ts.map

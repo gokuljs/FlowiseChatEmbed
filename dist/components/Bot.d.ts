@@ -1,10 +1,12 @@
 import { BotMessageTheme, TextInputTheme, UserMessageTheme } from '@/features/bubble/types';
+import { FeedBack } from '@/models/giveFeedback';
 type messageType = 'apiMessage' | 'userMessage' | 'usermessagewaiting';
 export type MessageType = {
     message: string;
     type: messageType;
     sourceDocuments?: any;
     fileAnnotations?: any;
+    feedback?: FeedBack;
 };
 export type BotProps = {
     chatflowid: string;

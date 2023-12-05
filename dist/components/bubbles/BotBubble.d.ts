@@ -1,15 +1,17 @@
 import { Accessor, Setter } from 'solid-js';
-import { FeedbackType } from '@/models/giveFeedback';
+import { FeedBack, FeedbackProps } from '@/models/giveFeedback';
 type Props = {
     message: string;
-    giveFeedBack: Accessor<FeedbackType>;
-    setGiveFeedBack: Setter<FeedbackType>;
+    giveFeedBack: Accessor<FeedbackProps | null>;
+    setGiveFeedBack: Setter<FeedbackProps | null>;
+    defaultWelcomeMessage: string;
     apiHost?: string;
     fileAnnotations?: any;
     showAvatar?: boolean;
     avatarSrc?: string;
     backgroundColor?: string;
     textColor?: string;
+    feedback?: FeedBack;
 };
 export declare const BotBubble: (props: Props) => import("solid-js").JSX.Element;
 export {};
