@@ -22,7 +22,6 @@ export const sendMessageQuery = ({ chatflowid, apiHost = 'http://localhost:3000'
     url: `${apiHost}/api/v1/prediction/${chatflowid}`,
     body,
   });
-
 export const isStreamAvailableQuery = ({ chatflowid, apiHost = 'http://localhost:3000' }: MessageRequest) =>
   sendRequest<any>({
     method: 'GET',
@@ -35,4 +34,11 @@ export const sendFileDownloadQuery = ({ apiHost = 'http://localhost:3000', body 
     url: `${apiHost}/api/v1/openai-assistants-file`,
     body,
     type: 'blob',
+  });
+
+export const updateFeedBack = ({ chatflowid, apiHost = 'http://localhost:3000', body }: MessageRequest) =>
+  sendRequest<any>({
+    method: 'POST',
+    url: `${apiHost}/api/v1/chat/add-feedback/${chatflowid}`,
+    body,
   });

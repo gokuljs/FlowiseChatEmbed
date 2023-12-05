@@ -1,6 +1,6 @@
 import { createSignal, createEffect, For, onMount, Show } from 'solid-js';
 import { v4 as uuidv4 } from 'uuid';
-import { sendMessageQuery, isStreamAvailableQuery, IncomingInput } from '@/queries/sendMessageQuery';
+import { sendMessageQuery, isStreamAvailableQuery, IncomingInput, updateFeedBack } from '@/queries/sendMessageQuery';
 import { TextInput } from './inputs/textInput';
 import { GuestBubble } from './bubbles/GuestBubble';
 import { BotBubble } from './bubbles/BotBubble';
@@ -13,7 +13,7 @@ import { Popup } from '@/features/popup';
 import { Avatar } from '@/components/avatars/Avatar';
 import { DeleteButton } from '@/components/SendButton';
 import CloseIcon from '@/assets/Icons/close';
-import { FeedbackType } from '@/models/giveFeedback';
+import { FeedBack, FeedbackProps } from '@/models/giveFeedback';
 import BsHandThumbsUp from '@/assets/Icons/ThumbUp';
 import BsHandThumbsDown from '@/assets/Icons/ThumbsDown';
 import { set } from 'lodash';
@@ -25,6 +25,7 @@ export type MessageType = {
   type: messageType;
   sourceDocuments?: any;
   fileAnnotations?: any;
+  feedback?: FeedBack;
 };
 
 export type BotProps = {
@@ -130,7 +131,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
   let botContainer: HTMLDivElement | undefined;
 
   const [userInput, setUserInput] = createSignal('');
-  const [giveFeedBack, setGiveFeedBack] = createSignal<FeedbackType>(null);
+  const [giveFeedBack, setGiveFeedBack] = createSignal<FeedbackProps | null>(null);
   const [loading, setLoading] = createSignal(false);
   const [sourcePopupOpen, setSourcePopupOpen] = createSignal(false);
   const [sourcePopupSrc, setSourcePopupSrc] = createSignal({});
@@ -283,6 +284,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
           type: 'apiMessage',
         },
       ]);
+      setGiveFeedBack(null);
     } catch (error: any) {
       const errorData = error.response.data || `${error.response.status}: ${error.response.statusText}`;
       console.error(`error: ${errorData}`);
@@ -308,6 +310,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
         const chatHistory: MessageType = {
           message: message.message,
           type: message.type,
+          feedback: message.feedback,
         };
         if (message.sourceDocuments) chatHistory.sourceDocuments = message.sourceDocuments;
         if (message.fileAnnotations) chatHistory.fileAnnotations = message.fileAnnotations;
@@ -379,6 +382,44 @@ export const Bot = (props: BotProps & { class?: string }) => {
     return newSourceDocuments;
   };
 
+  const handleFeedbackSubmit = async (): Promise<void> => {
+    const chatMessage = localStorage.getItem(`${props.chatflowid}_EXTERNAL`);
+    if (chatMessage && giveFeedBack()) {
+      const chats = JSON.parse(chatMessage)?.chatHistory;
+      const updatedMessage = chats.map((item: MessageType) => {
+        if (item?.message === giveFeedBack()?.chatMessage) {
+          return {
+            ...item,
+            feedback: {
+              feedBackType: giveFeedBack()?.feedBackType,
+              feedbackMessage: giveFeedBack()?.feedbackMessage,
+            },
+          };
+        }
+        return item;
+      });
+      const body: IncomingInput = {
+        question: '',
+        history: updatedMessage.filter((item: MessageType) => item?.message === giveFeedBack()?.chatMessage),
+        chatId: chatId(),
+        socketIOClientId: socketIOClientId(),
+      };
+
+      try {
+        await updateFeedBack({
+          chatflowid: props.chatflowid,
+          apiHost: props.apiHost,
+          body,
+        });
+        setMessages(updatedMessage);
+        localStorage.setItem(`${props.chatflowid}_EXTERNAL`, JSON.stringify({ chatId: chatId(), chatHistory: updatedMessage }));
+      } catch (error) {
+        console.error('API Error:', error);
+      }
+    }
+    setGiveFeedBack(null);
+  };
+
   return (
     <>
       <div
@@ -414,6 +455,8 @@ export const Bot = (props: BotProps & { class?: string }) => {
                       avatarSrc={props.botMessage?.avatarSrc}
                       giveFeedBack={giveFeedBack}
                       setGiveFeedBack={setGiveFeedBack}
+                      feedback={message?.feedback}
+                      defaultWelcomeMessage={defaultWelcomeMessage}
                     />
                   )}
                   {message.type === 'userMessage' && loading() && index() === messages().length - 1 && <LoadingBubble />}
@@ -500,10 +543,10 @@ export const Bot = (props: BotProps & { class?: string }) => {
                 <div
                   class="flex justify-center items-center w-[30px] h-[30px] rounded-full"
                   style={{
-                    background: giveFeedBack() === 'THUMBS_UP' ? '#def1de' : '#fee2e2',
+                    background: giveFeedBack()?.feedBackType === 'POSITIVE' ? '#def1de' : '#fee2e2',
                   }}
                 >
-                  {giveFeedBack() === 'THUMBS_UP' ? <BsHandThumbsUp color="#6cbf6c" /> : <BsHandThumbsDown color="#fc0000" />}
+                  {giveFeedBack()?.feedBackType === 'POSITIVE' ? <BsHandThumbsUp color="#6cbf6c" /> : <BsHandThumbsDown color="#fc0000" />}
                 </div>
                 Provide additional feedback
               </div>
@@ -519,12 +562,26 @@ export const Bot = (props: BotProps & { class?: string }) => {
             </div>
             <div class="flex-1 h-full px-2.5 py-0.5">
               <textarea
+                value={giveFeedBack()?.feedbackMessage ?? ''}
+                onChange={(e) => {
+                  setGiveFeedBack((prevFeedback) =>
+                    prevFeedback
+                      ? {
+                          ...prevFeedback,
+                          feedbackMessage: e.target.value,
+                        }
+                      : null,
+                  );
+                }}
                 class="h-full w-full p-2 border-2 rounded-md bg-gray-100 text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-y placeholder-gray-400"
                 placeholder="Enter your feedback here..."
               ></textarea>
             </div>
             <div class="flex items-center justify-end h-[50px] px-2.5">
-              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg hover:shadow-xl transition ease-in-out duration-300">
+              <button
+                onClick={handleFeedbackSubmit}
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg hover:shadow-xl transition ease-in-out duration-300"
+              >
                 Submit Feedback
               </button>
             </div>
