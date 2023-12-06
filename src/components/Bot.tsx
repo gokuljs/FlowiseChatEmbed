@@ -420,6 +420,12 @@ export const Bot = (props: BotProps & { class?: string }) => {
     setGiveFeedBack(null);
   };
 
+  createEffect(() => {
+    if (giveFeedBack()) {
+      chatContainer?.scrollTo(0, chatContainer.scrollHeight);
+    }
+  });
+
   return (
     <>
       <div
@@ -428,7 +434,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
       >
         <div class="flex w-full h-full justify-center">
           <div
-            style={{ 'padding-bottom': '100px', 'padding-top': '70px' }}
+            style={{ 'padding-bottom': giveFeedBack() ? '250px' : '100px', 'padding-top': '70px' }}
             ref={chatContainer}
             class="overflow-y-scroll min-w-full w-full min-h-full px-3 pt-10 relative scrollable-container chatbot-chat-view scroll-smooth"
           >
