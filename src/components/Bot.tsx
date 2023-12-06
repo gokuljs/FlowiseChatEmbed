@@ -415,7 +415,8 @@ export const Bot = (props: BotProps & { class?: string }) => {
           body,
         });
         if (response.error) {
-          console.error('API Error:', response.error);
+          console.log('API Error:', response.error);
+          setFeedBackErrMsg(String('API Error : ' + response.error));
         } else {
           setMessages(updatedMessage);
           localStorage.setItem(`${props.chatflowid}_EXTERNAL`, JSON.stringify({ chatId: chatId(), chatHistory: updatedMessage }));
