@@ -438,9 +438,11 @@ export const Bot = (props: BotProps & { class?: string }) => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && giveFeedBack()) {
         setGiveFeedBack(null);
+        setFeedBackErrMsg('');
       }
       if (event.key === 'Enter' && giveFeedBack()) {
         handleFeedbackSubmit();
+        setFeedBackErrMsg('');
       }
     };
     document.addEventListener('keydown', handleKeyDown);
@@ -586,6 +588,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
                 color=" #bbbbbb"
                 onclick={() => {
                   setGiveFeedBack(null);
+                  setFeedBackErrMsg('');
                 }}
               />
             </div>
