@@ -409,14 +409,18 @@ export const Bot = (props: BotProps & { class?: string }) => {
         socketIOClientId: socketIOClientId(),
       };
       try {
-        await updateFeedBack({
+        const response = await updateFeedBack({
           chatflowid: props.chatflowid,
           apiHost: props.apiHost,
           body,
         });
-        setMessages(updatedMessage);
-        localStorage.setItem(`${props.chatflowid}_EXTERNAL`, JSON.stringify({ chatId: chatId(), chatHistory: updatedMessage }));
-        setGiveFeedBack(null);
+        if (response.error) {
+          console.error('API Error:', response.error);
+        } else {
+          setMessages(updatedMessage);
+          localStorage.setItem(`${props.chatflowid}_EXTERNAL`, JSON.stringify({ chatId: chatId(), chatHistory: updatedMessage }));
+          setGiveFeedBack(null);
+        }
       } catch (error) {
         console.error('API Error:', error);
       }
