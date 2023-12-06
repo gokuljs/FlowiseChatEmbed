@@ -147,6 +147,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
   const [socketIOClientId, setSocketIOClientId] = createSignal('');
   const [isChatFlowAvailableToStream, setIsChatFlowAvailableToStream] = createSignal(false);
   const [chatId, setChatId] = createSignal(uuidv4());
+  const [feedbackErrMsg, setFeedBackErrMsg] = createSignal('');
 
   onMount(() => {
     if (!bottomSpacer) return;
@@ -384,6 +385,10 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
   const handleFeedbackSubmit = async (): Promise<void> => {
     const chatMessage = localStorage.getItem(`${props.chatflowid}_EXTERNAL`);
+    if (giveFeedBack()?.feedbackMessage.length === 0) {
+      setFeedBackErrMsg('Please enter your feedback before submitting.');
+      return;
+    }
     if (chatMessage && giveFeedBack()) {
       const chats = JSON.parse(chatMessage)?.chatHistory;
       const updatedMessage = chats.map((item: MessageType) => {
@@ -424,6 +429,21 @@ export const Bot = (props: BotProps & { class?: string }) => {
     if (giveFeedBack()) {
       chatContainer?.scrollTo(0, chatContainer.scrollHeight);
     }
+  });
+
+  createEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && giveFeedBack()) {
+        setGiveFeedBack(null);
+      }
+      if (event.key === 'Enter' && giveFeedBack()) {
+        handleFeedbackSubmit();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   });
 
   return (
@@ -569,7 +589,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
             <div class="flex-1 h-full px-2.5 py-0.5">
               <textarea
                 value={giveFeedBack()?.feedbackMessage ?? ''}
-                onChange={(e) => {
+                onInput={(e) => {
                   setGiveFeedBack((prevFeedback) =>
                     prevFeedback
                       ? {
@@ -578,11 +598,13 @@ export const Bot = (props: BotProps & { class?: string }) => {
                         }
                       : null,
                   );
+                  setFeedBackErrMsg('');
                 }}
                 class="h-full w-full p-2 border-2 rounded-md bg-gray-100 text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-y placeholder-gray-400"
                 placeholder="Enter your feedback here..."
               ></textarea>
             </div>
+            <p class="pl-3 text-red-500">{feedbackErrMsg()}</p>
             <div class="flex items-center justify-end h-[50px] px-2.5">
               <button
                 onClick={handleFeedbackSubmit}
