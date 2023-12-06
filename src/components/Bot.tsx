@@ -16,7 +16,6 @@ import CloseIcon from '@/assets/Icons/close';
 import { FeedBack, FeedbackProps } from '@/models/giveFeedback';
 import BsHandThumbsUp from '@/assets/Icons/ThumbUp';
 import BsHandThumbsDown from '@/assets/Icons/ThumbsDown';
-import { set } from 'lodash';
 
 type messageType = 'apiMessage' | 'userMessage' | 'usermessagewaiting';
 
