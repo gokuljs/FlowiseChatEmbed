@@ -421,7 +421,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
         console.error('API Error:', error);
       }
     }
-    setGiveFeedBack(null);
   };
 
   createEffect(() => {
