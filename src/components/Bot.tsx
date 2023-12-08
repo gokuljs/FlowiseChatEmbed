@@ -25,6 +25,7 @@ export type MessageType = {
   sourceDocuments?: any;
   fileAnnotations?: any;
   feedback?: FeedBack;
+  id?: string;
 };
 
 export type BotProps = {
@@ -220,9 +221,9 @@ export const Bot = (props: BotProps & { class?: string }) => {
     // Send user question and history to API
     const welcomeMessage = props.welcomeMessage ?? defaultWelcomeMessage;
     const messageList = messages().filter((msg) => msg.message !== welcomeMessage);
-
+    const id = uuidv4() + '-' + Date.now();
     setMessages((prevMessages) => {
-      const messages: MessageType[] = [...prevMessages, { message: value, type: 'userMessage' }];
+      const messages: MessageType[] = [...prevMessages, { id: id, message: value, type: 'userMessage' }];
       addChatMessage(messages);
       return messages;
     });
@@ -231,6 +232,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
       question: value,
       history: messageList,
       chatId: chatId(),
+      id: id,
     };
 
     if (props.chatflowConfig) body.overrideConfig = props.chatflowConfig;
@@ -254,7 +256,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
         setMessages((prevMessages) => {
           const messages: MessageType[] = [
             ...prevMessages,
-            { message: text, sourceDocuments: data?.sourceDocuments, fileAnnotations: data?.fileAnnotations, type: 'apiMessage' },
+            { message: text, sourceDocuments: data?.sourceDocuments, fileAnnotations: data?.fileAnnotations, type: 'apiMessage', id: data.id },
           ];
           addChatMessage(messages);
           return messages;
@@ -384,13 +386,14 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
   const handleFeedbackSubmit = async (): Promise<void> => {
     const chatMessage = localStorage.getItem(`${props.chatflowid}_EXTERNAL`);
+
     if (giveFeedBack()?.feedbackMessage.length === 0) {
       setFeedBackErrMsg('Please enter your feedback before submitting.');
       return;
     }
     if (chatMessage && giveFeedBack()) {
       const chats = JSON.parse(chatMessage)?.chatHistory;
-      const updatedMessage = chats.map((item: MessageType) => {
+      const updatedMessages = chats.map((item: MessageType) => {
         if (item?.message === giveFeedBack()?.chatMessage) {
           return {
             ...item,
@@ -402,11 +405,12 @@ export const Bot = (props: BotProps & { class?: string }) => {
         }
         return item;
       });
+      const updatedMessage = updatedMessages.filter((item: MessageType) => item?.message === giveFeedBack()?.chatMessage);
       const body: IncomingInput = {
         question: '',
-        history: updatedMessage.filter((item: MessageType) => item?.message === giveFeedBack()?.chatMessage),
+        history: updatedMessage,
         chatId: chatId(),
-        socketIOClientId: socketIOClientId(),
+        id: updatedMessage[0].id,
       };
       try {
         const response = await updateFeedBack({
@@ -418,8 +422,8 @@ export const Bot = (props: BotProps & { class?: string }) => {
           console.log('API Error:', response.error);
           setFeedBackErrMsg(String('API Error : ' + response.error));
         } else {
-          setMessages(updatedMessage);
-          localStorage.setItem(`${props.chatflowid}_EXTERNAL`, JSON.stringify({ chatId: chatId(), chatHistory: updatedMessage }));
+          setMessages(updatedMessages);
+          localStorage.setItem(`${props.chatflowid}_EXTERNAL`, JSON.stringify({ chatId: chatId(), chatHistory: updatedMessages }));
           setGiveFeedBack(null);
         }
       } catch (error) {

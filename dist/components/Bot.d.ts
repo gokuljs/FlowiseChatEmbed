@@ -7,6 +7,7 @@ export type MessageType = {
     sourceDocuments?: any;
     fileAnnotations?: any;
     feedback?: FeedBack;
+    id?: string;
 };
 export type BotProps = {
     chatflowid: string;

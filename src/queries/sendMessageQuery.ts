@@ -2,6 +2,7 @@ import { MessageType } from '@/components/Bot';
 import { sendRequest } from '@/utils/index';
 
 export type IncomingInput = {
+  id?: string;
   question: string;
   history: MessageType[];
   overrideConfig?: Record<string, unknown>;
@@ -14,6 +15,7 @@ export type MessageRequest = {
   chatflowid?: string;
   apiHost?: string;
   body?: IncomingInput;
+  id?: string;
 };
 
 export const sendMessageQuery = ({ chatflowid, apiHost = 'http://localhost:3000', body }: MessageRequest) =>

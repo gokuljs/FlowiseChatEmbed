@@ -1,5 +1,6 @@
 import { MessageType } from '@/components/Bot';
 export type IncomingInput = {
+    id?: string;
     question: string;
     history: MessageType[];
     overrideConfig?: Record<string, unknown>;
@@ -11,6 +12,7 @@ export type MessageRequest = {
     chatflowid?: string;
     apiHost?: string;
     body?: IncomingInput;
+    id?: string;
 };
 export declare const sendMessageQuery: ({ chatflowid, apiHost, body }: MessageRequest) => Promise<{
     data?: any;
