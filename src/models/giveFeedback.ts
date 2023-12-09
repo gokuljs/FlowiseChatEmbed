@@ -3,5 +3,6 @@ export type FeedBack = {
   feedbackMessage: string;
 };
 export type FeedbackProps = FeedBack & {
+  apiId?: string;
   chatMessage: string;
 };

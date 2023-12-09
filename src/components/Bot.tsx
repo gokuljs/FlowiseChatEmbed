@@ -262,6 +262,16 @@ export const Bot = (props: BotProps & { class?: string }) => {
           return messages;
         });
       }
+      setMessages((prev) => {
+        const updated = prev.map((item, i) => {
+          if (i === prev.length - 1) {
+            return { ...item, message: item.message, id: data.id };
+          }
+          return item;
+        });
+        addChatMessage(updated);
+        return [...updated];
+      });
       setLoading(false);
       setUserInput('');
       scrollToBottom();
@@ -310,6 +320,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
       setChatId(objChatMessage.chatId);
       const loadedMessages = objChatMessage.chatHistory.map((message: MessageType) => {
         const chatHistory: MessageType = {
+          ...(message.id ? { id: message.id } : {}),
           message: message.message,
           type: message.type,
           feedback: message.feedback,
@@ -405,7 +416,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
         }
         return item;
       });
-      const updatedMessage = updatedMessages.filter((item: MessageType) => item?.message === giveFeedBack()?.chatMessage);
+      const updatedMessage = updatedMessages.filter((item: MessageType) => item?.id === giveFeedBack()?.apiId);
       const body: IncomingInput = {
         question: '',
         history: updatedMessage,
@@ -492,6 +503,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
                       setGiveFeedBack={setGiveFeedBack}
                       feedback={message?.feedback}
                       defaultWelcomeMessage={defaultWelcomeMessage}
+                      apiId={message?.id}
                     />
                   )}
                   {message.type === 'userMessage' && loading() && index() === messages().length - 1 && <LoadingBubble />}

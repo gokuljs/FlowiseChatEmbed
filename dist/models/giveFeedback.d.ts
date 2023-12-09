@@ -3,6 +3,7 @@ export type FeedBack = {
     feedbackMessage: string;
 };
 export type FeedbackProps = FeedBack & {
+    apiId?: string;
     chatMessage: string;
 };
 //# sourceMappingURL=giveFeedback.d.ts.map

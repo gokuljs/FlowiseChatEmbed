@@ -19,6 +19,7 @@ type Props = {
   backgroundColor?: string;
   textColor?: string;
   feedback?: FeedBack;
+  apiId?: string;
 };
 
 const defaultBackgroundColor = '#f7f8ff';
@@ -62,6 +63,7 @@ export const BotBubble = (props: Props) => {
                 className="cursor-pointer"
                 onclick={() => {
                   props.setGiveFeedBack({
+                    ...(props.apiId ? { apiId: props.apiId } : {}),
                     feedBackType: 'POSITIVE',
                     chatMessage: props.message,
                     feedbackMessage: '',
@@ -75,6 +77,7 @@ export const BotBubble = (props: Props) => {
                 className="cursor-pointer"
                 onclick={() => {
                   props.setGiveFeedBack({
+                    ...(props.apiId ? { apiId: props.apiId } : {}),
                     feedBackType: 'NEGATIVE',
                     chatMessage: props.message,
                     feedbackMessage: '',
