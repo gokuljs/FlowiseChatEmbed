@@ -57,7 +57,7 @@ export const BotBubble = (props: Props) => {
       botMessageEl.appendChild(svgContainerElement);
       render(
         () =>
-          !props?.feedback && props?.defaultWelcomeMessage !== props?.message ? (
+          !props?.feedback && props?.defaultWelcomeMessage !== props?.message && props.apiId ? (
             <div class="flex items-center mt-2 gap-1">
               <BsHandThumbsUp
                 className="cursor-pointer"
